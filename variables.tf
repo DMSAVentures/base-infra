@@ -36,3 +36,15 @@ variable "service_name_api" {
   type        = string
   default     = "api_service"
 }
+
+variable "container_name_webapp" {
+  description = "container name"
+  type        = string
+  default     = "webapp"
+}
+
+variable "service_name_webapp" {
+  description = "service name"
+  type        = string
+  default     = "webapp_service"
+}
