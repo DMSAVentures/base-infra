@@ -71,6 +71,7 @@ resource "aws_launch_configuration" "app_launch_config" {
   # User data to set ECS cluster
   user_data = <<-EOF
     #!/bin/bash
+    sudo dnf install -y ec2-instance-connect
     echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
   EOF
 }

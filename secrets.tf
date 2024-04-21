@@ -11,8 +11,7 @@ resource "random_string" "db_username" {
 # Generate a random password
 resource "random_string" "db_password" {
   length           = 16
-  special          = true
-  override_special = "_%@"
+  special = false
 }
 
 resource "aws_ssm_parameter" "db_endpoint" {

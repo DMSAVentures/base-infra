@@ -34,7 +34,7 @@ resource "aws_ecs_task_definition" "task_definition" {
       portMappings = [
         {
           containerPort = 80  # Inside the container
-          hostPort      = 80  # On the host EC2 instance
+          hostPort      = 0  # On the host EC2 instance
         }
       ]
       # Health check configuration
