@@ -32,9 +32,3 @@ resource "aws_ssm_parameter" "db_password" {
   type  = "SecureString"
   value = aws_db_instance.default.password
 }
-
-resource "aws_ssm_parameter" "eks_cluster_name" {
-  name  = "/eks/cluster_name"
-  type  = "String"
-  value = aws_eks_cluster.protoapp.name
-}
