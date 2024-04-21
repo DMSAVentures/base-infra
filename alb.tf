@@ -42,18 +42,50 @@ resource "aws_alb_target_group" "ecs_target" {
     }
 }
 
-## ALB Listener Rule
-#resource "aws_lb_listener_rule" "alb_listener_rule" {
-#  listener_arn = aws_lb_listener.https_listener.id
-#  priority     = 1
-#
-#  action {
-#    type             = "forward"
-#    target_group_arn = aws_alb_target_group.ecs_target.arn
-#  }
-#
-#  condition {
-#    field   = "path-pattern"
-#    values  = ["/"]
-#  }
-#}
+resource "aws_alb_target_group" "webapp_ecs_target" {
+  name        = "webapp-ecs-target-group"
+  port        = 3000
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.base_vpc.id
+
+  health_check {
+    path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 5
+    interval            = 30
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+  }
+}
+
+# ALB Listener Rule
+resource "aws_lb_listener_rule" "alb_listener_rule_api" {
+  listener_arn = aws_lb_listener.https_listener.id
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.ecs_target.arn
+  }
+
+  condition {
+    field   = "path-pattern"
+    values  = ["/api/*"]
+  }
+}
+
+resource "aws_lb_listener_rule" "alb_listener_rule_webapp" {
+  listener_arn = aws_lb_listener.https_listener.id
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.webapp_ecs_target.arn
+  }
+
+  condition {
+    field   = "path-pattern"
+    values  = ["/"]
+  }
+}

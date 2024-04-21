@@ -11,7 +11,7 @@ resource "aws_ecs_service" "webapp_service" {
   load_balancer {  # Load balancer configuration
     container_name   = var.container_name_webapp  # Reference the container name
     container_port   = 3000  # Port on the container
-    target_group_arn = aws_alb_target_group.ecs_target.arn  # Target group for the load balancer
+    target_group_arn = aws_alb_target_group.webapp_ecs_target.arn  # Target group for the load balancer
   }
 }
 
