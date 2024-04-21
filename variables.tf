@@ -18,3 +18,15 @@ variable "domain_name" {
   type        = string
   default     = "protoapp.xyz"
 }
+
+variable "aws_region" {
+  description = "aws region"
+    type        = string
+    default     = "us-east-1"
+}
+
+variable "container_name_api" {
+    description = "container name"
+    type        = string
+    default     = "api"
+}

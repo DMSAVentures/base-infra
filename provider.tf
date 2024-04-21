@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 # Retrieve the Cloudflare API key from SSM
 data "aws_ssm_parameter" "cloudflare_api_key" {
