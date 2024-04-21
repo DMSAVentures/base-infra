@@ -1,7 +1,7 @@
 # ECS Service
 # Defines the ECS service with desired count, load balancers, and task definition.
 resource "aws_ecs_service" "ecs_service" {
-  name            = "API Service"  # Service name
+  name            = var.service_name_api  # Service name
   cluster         = aws_ecs_cluster.ecs_cluster.id  # Link to ECS cluster
   desired_count   = 1  # Number of tasks to run
   launch_type     = "EC2"  # EC2 launch type
@@ -15,6 +15,10 @@ resource "aws_ecs_service" "ecs_service" {
   }
 }
 
+data "aws_ecr_repository" "api_service" {
+  name = "base-server"
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -23,9 +27,9 @@ resource "aws_ecs_task_definition" "task_definition" {
   container_definitions = jsonencode([
     {
       name         = var.container_name_api  # Container name
-      image        = "nginx:latest"  # Docker image to run in ECS
+      image        = data.aws_ecr_repository.api_service.repository_url  # Docker image to run in ECS
       cpu          = 256  # CPU units
-      memory       = 512  # Memory in MB
+      memory       = 256  # Memory in MB
       essential    = true  # Is this container essential to the task?
       portMappings = [
         {
@@ -33,6 +37,17 @@ resource "aws_ecs_task_definition" "task_definition" {
           hostPort      = 80  # On the host EC2 instance
         }
       ]
+      # Health check configuration
+      healthCheck = {
+        command = [
+          "CMD-SHELL",
+          "curl -f http://localhost:80/health || exit 1"  # Command to check if the container is healthy
+        ]
+        interval        = 10  # Time (in seconds) between health checks
+        timeout         = 5   # Time (in seconds) to wait for a response before considering it a failure
+        retries         = 3   # Number of retries before marking the container as unhealthy
+        startPeriod     = 5   # Optional grace period (in seconds) to wait before health checks start
+      }
       logConfiguration = {
         logDriver = "awslogs"  # CloudWatch logging
         options   = {

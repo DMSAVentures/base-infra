@@ -32,13 +32,13 @@ resource "aws_alb_target_group" "ecs_target" {
     vpc_id      = aws_vpc.base_vpc.id
 
     health_check {
-        path                = "/"
+        path                = "/health"
         port                = "traffic-port"
         protocol            = "HTTP"
         timeout             = 5
-        interval            = 30
+        interval            = 10
         healthy_threshold   = 2
-        unhealthy_threshold = 2
+        unhealthy_threshold = 5
     }
 }
 

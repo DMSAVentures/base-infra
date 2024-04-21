@@ -30,3 +30,9 @@ variable "container_name_api" {
     type        = string
     default     = "api"
 }
+
+variable "service_name_api" {
+  description = "service name"
+  type        = string
+  default     = "api_service"
+}
