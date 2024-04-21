@@ -21,35 +21,39 @@ resource "aws_lb_listener" "https_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.k8s_tg.arn
+    target_group_arn = aws_alb_target_group.ecs_target.arn
   }
 }
 
-resource "aws_lb_target_group" "k8s_tg" {
-  name     = "k8sTargetGroup"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = aws_vpc.base_vpc.id
+resource "aws_alb_target_group" "ecs_target" {
+    name        = "ecs-target-group"
+    port        = 80
+    protocol    = "HTTP"
+    vpc_id      = aws_vpc.base_vpc.id
 
-  health_check {
-    enabled             = true
-    healthy_threshold   = 5
-    unhealthy_threshold = 2
-    timeout             = 5
-    path                = "/"
-    protocol            = "HTTP"
-    interval            = 30
-    matcher             = "200"
-  }
-
-  tags = {
-    Name = "k8sTargetGroup"
-  }
+    health_check {
+        path                = "/"
+        port                = "traffic-port"
+        protocol            = "HTTP"
+        timeout             = 5
+        interval            = 30
+        healthy_threshold   = 2
+        unhealthy_threshold = 2
+    }
 }
 
-resource "aws_lb_target_group_attachment" "protoapp_attach" {
-  target_group_arn = aws_lb_target_group.k8s_tg.arn
-  target_id        = aws_instance.protoapp.id
-  port             = 80
-}
-
+## ALB Listener Rule
+#resource "aws_lb_listener_rule" "alb_listener_rule" {
+#  listener_arn = aws_lb_listener.https_listener.id
+#  priority     = 1
+#
+#  action {
+#    type             = "forward"
+#    target_group_arn = aws_alb_target_group.ecs_target.arn
+#  }
+#
+#  condition {
+#    field   = "path-pattern"
+#    values  = ["/"]
+#  }
+#}
