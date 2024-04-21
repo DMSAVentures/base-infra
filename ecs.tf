@@ -21,6 +21,30 @@ resource "aws_iam_role" "ecs_service_role" {
   })
 }
 
+# IAM Policy for ECS Service Role
+# Attach a policy that grants permissions for ECS Service to interact with other AWS services.
+resource "aws_iam_role_policy_attachment" "ecs_service_role_policy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"  # Policy for ECS Service
+  role       = aws_iam_role.ecs_service_role.name  # Attach to ECS service role
+}
+
+# ECS Service
+# Defines the ECS service with desired count, load balancers, and task definition.
+resource "aws_ecs_service" "ecs_service" {
+  name            = "ECSService"  # Service name
+  cluster         = aws_ecs_cluster.ecs_cluster.id  # Link to ECS cluster
+  desired_count   = 1  # Number of tasks to run
+  launch_type     = "EC2"  # EC2 launch type
+  task_definition = aws_ecs_task_definition.task_definition.arn  # Reference the task definition
+  iam_role        = aws_iam_role.ecs_service_role.name  # ECS service role for permissions
+
+  load_balancer {  # Load balancer configuration
+    container_name   = "base-app"  # Reference the container name
+    container_port   = 80  # Port on the container
+    target_group_arn = aws_alb_target_group.ecs_target.arn  # Target group for the load balancer
+  }
+}
+
 # IAM Role for EC2 Instances
 # This role allows EC2 instances to assume the role and interact with ECS.
 resource "aws_iam_role" "ec2_role" {
@@ -39,13 +63,6 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# IAM Policy for ECS Service Role
-# Attach a policy that grants permissions for ECS Service to interact with other AWS services.
-resource "aws_iam_role_policy_attachment" "ecs_service_role_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"  # Policy for ECS Service
-  role       = aws_iam_role.ecs_service_role.name  # Attach to ECS service role
-}
-
 # IAM Instance Profile for EC2 Instances
 # Connects an instance profile to the EC2 role, used to manage permissions for ECS EC2 instances.
 resource "aws_iam_instance_profile" "ecs_instance_profile" {
@@ -58,6 +75,36 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
 resource "aws_iam_role_policy_attachment" "ecs_policy_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
   role       = aws_iam_role.ec2_role.name  # Attach to EC2 role
+}
+
+# Launch Configuration for AutoScaling Group
+# Defines the EC2 launch configuration for ECS instances.
+resource "aws_launch_configuration" "app_launch_config" {
+  name               = "app-launch-config"  # Name of the launch config
+  image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
+  instance_type      = "t2.micro"  # Instance type (e.g., t2.micro)
+  security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
+  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
+  # User data to set ECS cluster
+  user_data = <<-EOF
+    #!/bin/bash
+    echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
+  EOF
+}
+
+# AutoScaling Group
+# AutoScaling group to manage ECS instances.
+resource "aws_autoscaling_group" "ecs_autoscaling" {
+  vpc_zone_identifier = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]  # Subnets for the ASG
+  min_size            = 1  # Minimum number of instances
+  max_size            = 1  # Maximum number of instances
+  desired_capacity    = 1  # Desired number of instances
+  launch_configuration = aws_launch_configuration.app_launch_config.name  # Reference the launch config
+  tag {
+    key                 = "Name"
+    value               = "ECS AutoScaling Group"
+    propagate_at_launch = true
+  }
 }
 
 # IAM Role for ECS Task Execution
@@ -113,56 +160,9 @@ resource "aws_ecs_task_definition" "task_definition" {
   ])
 }
 
-# ECS Service
-# Defines the ECS service with desired count, load balancers, and task definition.
-resource "aws_ecs_service" "ecs_service" {
-  name            = "ECSService"  # Service name
-  cluster         = aws_ecs_cluster.ecs_cluster.id  # Link to ECS cluster
-  desired_count   = 1  # Number of tasks to run
-  launch_type     = "EC2"  # EC2 launch type
-  task_definition = aws_ecs_task_definition.task_definition.arn  # Reference the task definition
-  iam_role        = aws_iam_role.ecs_service_role.name  # ECS service role for permissions
-
-  load_balancer {  # Load balancer configuration
-    container_name   = "base-app"  # Reference the container name
-    container_port   = 80  # Port on the container
-    target_group_arn = aws_alb_target_group.ecs_target.arn  # Target group for the load balancer
-  }
-}
-
 # CloudWatch Log Group
 # Defines a CloudWatch log group for ECS task logging.
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
   name              = "base-app-logs"  # Log group name
   retention_in_days = 14  # Retention period for logs
-}
-
-# AutoScaling Group
-# AutoScaling group to manage ECS instances.
-resource "aws_autoscaling_group" "ecs_autoscaling" {
-  vpc_zone_identifier = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]  # Subnets for the ASG
-  min_size            = 1  # Minimum number of instances
-  max_size            = 1  # Maximum number of instances
-  desired_capacity    = 1  # Desired number of instances
-  launch_configuration = aws_launch_configuration.app_launch_config.name  # Reference the launch config
-  tag {
-    key                 = "Name"
-    value               = "ECS AutoScaling Group"
-    propagate_at_launch = true
-  }
-}
-
-# Launch Configuration for AutoScaling Group
-# Defines the EC2 launch configuration for ECS instances.
-resource "aws_launch_configuration" "app_launch_config" {
-  name               = "app-launch-config"  # Name of the launch config
-  image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
-  instance_type      = "t2.micro"  # Instance type (e.g., t2.micro)
-  security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
-  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
-  # User data to set ECS cluster
-  user_data = <<-EOF
-    #!/bin/bash
-    echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
-  EOF
 }
