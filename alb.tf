@@ -35,10 +35,10 @@ resource "aws_alb_target_group" "ecs_target" {
         path                = "/health"
         port                = "traffic-port"
         protocol            = "HTTP"
-        timeout             = 2
-        interval            = 5
-        healthy_threshold   = 3
-        unhealthy_threshold = 5
+        timeout             = 5
+        interval            = 30
+        healthy_threshold   = 5
+        unhealthy_threshold = 2
     }
 }
 
