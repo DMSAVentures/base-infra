@@ -43,10 +43,10 @@ resource "aws_ecs_task_definition" "task_definition" {
           "CMD-SHELL",
           "curl -f http://localhost:80/health || exit 1"  # Command to check if the container is healthy
         ]
-        interval        = 10  # Time (in seconds) between health checks
-        timeout         = 5   # Time (in seconds) to wait for a response before considering it a failure
-        retries         = 3   # Number of retries before marking the container as unhealthy
-        startPeriod     = 5   # Optional grace period (in seconds) to wait before health checks start
+        interval        = 5  # Time (in seconds) between health checks
+        timeout         = 2   # Time (in seconds) to wait for a response before considering it a failure
+        retries         = 5   # Number of retries before marking the container as unhealthy
+        startPeriod     = 2   # Optional grace period (in seconds) to wait before health checks start
       }
       logConfiguration = {
         logDriver = "awslogs"  # CloudWatch logging
