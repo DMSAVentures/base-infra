@@ -21,7 +21,7 @@ resource "aws_lb_listener" "https_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_alb_target_group.ecs_target.arn
+    target_group_arn = aws_alb_target_group.webapp_ecs_target.arn
   }
 }
 
@@ -70,14 +70,15 @@ resource "aws_lb_listener_rule" "alb_listener_rule_api" {
   }
 
   condition {
-    field   = "path-pattern"
-    values  = ["/api/*"]
+    path_pattern {
+      values = ["/api/*"]
+    }
   }
 }
 
 resource "aws_lb_listener_rule" "alb_listener_rule_webapp" {
   listener_arn = aws_lb_listener.https_listener.id
-  priority     = 1
+  priority     = 2
 
   action {
     type             = "forward"
@@ -85,7 +86,8 @@ resource "aws_lb_listener_rule" "alb_listener_rule_webapp" {
   }
 
   condition {
-    field   = "path-pattern"
-    values  = ["/"]
+    path_pattern {
+      values = ["/*"]
+    }
   }
 }
