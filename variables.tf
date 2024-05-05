@@ -48,3 +48,7 @@ variable "service_name_webapp" {
   type        = string
   default     = "webapp_service"
 }
+
+variable "environment" {
+  default = "production"
+}

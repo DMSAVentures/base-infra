@@ -48,6 +48,16 @@ resource "aws_ecs_task_definition" "webapp_task_definition" {
         retries         = 3   # Number of retries before marking the container as unhealthy
         startPeriod     = 2   # Optional grace period (in seconds) to wait before health checks start
       }
+      environment = [  # Environment variables
+        {
+          name = "NEXT_PUBLIC_GOOGLE_CLIENT_ID"
+          value = "264792512466-81b98c4ctp11qj177mgmj817o23a12bn.apps.googleusercontent.com"
+        },
+        {
+            name = "NEXT_PUBLIC_GOOGLE_REDIRECT_URI"
+            value = "https://protoapp.xyz/api/auth/google/callback"
+        }
+      ]
       logConfiguration = {
         logDriver = "awslogs"  # CloudWatch logging
         options   = {

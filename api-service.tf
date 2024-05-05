@@ -18,6 +18,15 @@ resource "aws_ecs_service" "ecs_service" {
 data "aws_ecr_repository" "api_service" {
   name = "base-server"
 }
+data "aws_ssm_parameter" "db_endpoint" {
+  name = aws_ssm_parameter.db_endpoint.name
+}
+data "aws_ssm_parameter" "db_username" {
+  name = aws_ssm_parameter.db_username.name
+}
+data "aws_ssm_parameter" "db_password" {
+  name = aws_ssm_parameter.db_password.name
+}
 
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
@@ -48,6 +57,28 @@ resource "aws_ecs_task_definition" "task_definition" {
         retries         = 3   # Number of retries before marking the container as unhealthy
         startPeriod     = 2   # Optional grace period (in seconds) to wait before health checks start
       }
+      environment = [  # Environment variables
+        {
+          name  = "GO_ENV"
+          value = var.environment
+        },
+        {
+          name  = "GIN_MODE"
+          value = "release"
+        },
+        {
+          name = "DB_HOST"
+          value = data.aws_ssm_parameter.db_endpoint.value
+        },
+        {
+          name = "DB_USERNAME"
+          value = data.aws_ssm_parameter.db_username.value
+        },
+        {
+          name = "DB_PASSWORD"
+          value = data.aws_ssm_parameter.db_password.value
+        }
+      ]
       logConfiguration = {
         logDriver = "awslogs"  # CloudWatch logging
         options   = {
