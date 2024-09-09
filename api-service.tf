@@ -31,6 +31,22 @@ data "aws_ssm_parameter" "db_name" {
   name = aws_ssm_parameter.db_name.name
 }
 
+data "aws_ssm_parameter" "jwt_secret" {
+  name = aws_ssm_parameter.jwt_secret.name
+}
+
+data "aws_ssm_parameter" "google_client_id" {
+  name = aws_ssm_parameter.google_client_id.name
+}
+
+data "aws_ssm_parameter" "google_client_secret" {
+  name = aws_ssm_parameter.google_client_secret.name
+}
+
+data "aws_ssm_parameter" "google_redirect_uri" {
+  name = aws_ssm_parameter.google_redirect_uri.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -84,6 +100,22 @@ resource "aws_ecs_task_definition" "task_definition" {
         {
           name = "DB_NAME"
           value = data.aws_ssm_parameter.db_name.value
+        },
+        {
+          name = "JWT_SECRET"
+            value = data.aws_ssm_parameter.jwt_secret.value
+        },
+        {
+          name = "GOOGLE_CLIENT_ID"
+          value = data.aws_ssm_parameter.google_client_id.value
+        },
+        {
+          name = "GOOGLE_CLIENT_SECRET"
+          value = data.aws_ssm_parameter.google_client_secret.value
+        },
+        {
+          name = "GOOGLE_REDIRECT_URI"
+          value = data.aws_ssm_parameter.google_redirect_uri.value
         }
       ]
       logConfiguration = {

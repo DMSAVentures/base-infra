@@ -52,3 +52,8 @@ variable "service_name_webapp" {
 variable "environment" {
   default = "production"
 }
+
+variable "google_client_secret" {
+  default = ""
+}
+
