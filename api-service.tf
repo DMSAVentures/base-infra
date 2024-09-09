@@ -47,6 +47,10 @@ data "aws_ssm_parameter" "google_redirect_uri" {
   name = aws_ssm_parameter.google_redirect_uri.name
 }
 
+data "aws_ssm_parameter" "web_app_uri" {
+  name = aws_ssm_parameter.web_app_uri.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -115,6 +119,10 @@ resource "aws_ecs_task_definition" "task_definition" {
         },
         {
           name = "GOOGLE_REDIRECT_URI"
+          value = data.aws_ssm_parameter.google_redirect_uri.value
+        },
+        {
+          name = "WEBAPP_URI"
           value = data.aws_ssm_parameter.google_redirect_uri.value
         }
       ]

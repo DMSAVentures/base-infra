@@ -69,5 +69,10 @@ resource "aws_ssm_parameter" "google_redirect_uri" {
   name = "/google_secrets/protoapp_google_redirect_uri"
   type = "String"
   value = "https://protoapp.xyz/api/auth/google/callback"
+}
 
+resource "aws_ssm_parameter" "web_app_uri" {
+  name = "/api_service/protoapp_web_app_uri"
+  type = "String"
+  value = "https://protoapp.xyz"
 }
