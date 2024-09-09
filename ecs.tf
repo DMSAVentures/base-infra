@@ -60,6 +60,12 @@ resource "aws_iam_role_policy_attachment" "ecs_policy_attachment" {
   role       = aws_iam_role.ec2_role.name  # Attach to EC2 role
 }
 
+# IAM Policy for SSM
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.ec2_role.name  # Attach to EC2 role
+}
+
 # Launch Configuration for AutoScaling Group
 # Defines the EC2 launch configuration for ECS instances.
 resource "aws_launch_configuration" "app_launch_config" {
@@ -69,8 +75,31 @@ resource "aws_launch_configuration" "app_launch_config" {
   security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
   # User data to set ECS cluster
+  lifecycle {
+    create_before_destroy = true
+  }
   user_data = <<-EOF
     #!/bin/bash
+    sudo dnf install -y ec2-instance-connect
+    echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
+  EOF
+}
+
+# Launch Configuration for AutoScaling Group
+# Defines the EC2 launch configuration for ECS instances.
+resource "aws_launch_configuration" "app_launch_config_with_ssm" {
+  name               = "app-launch-config-with-ssm"  # Name of the launch config
+  image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
+  instance_type      = "t2.micro"  # Instance type (e.g., t2.micro)
+  security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
+  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
+  # User data to set ECS cluster
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum install -y amazon-ssm-agent
+    sudo systemctl start amazon-ssm-agent
+    sudo systemctl enable amazon-ssm-agent
+
     sudo dnf install -y ec2-instance-connect
     echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
   EOF
@@ -83,7 +112,7 @@ resource "aws_autoscaling_group" "ecs_autoscaling" {
   min_size            = 1  # Minimum number of instances
   max_size            = 1  # Maximum number of instances
   desired_capacity    = 1  # Desired number of instances
-  launch_configuration = aws_launch_configuration.app_launch_config.name  # Reference the launch config
+  launch_configuration = aws_launch_configuration.app_launch_config_with_ssm.name  # Reference the launch config
   tag {
     key                 = "Name"
     value               = "ECS AutoScaling Group"
