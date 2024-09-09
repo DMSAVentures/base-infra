@@ -50,7 +50,7 @@ data "aws_ssm_parameter" "google_redirect_uri" {
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
-  family                = "base-app"  # Task family
+  family                = "base-server"  # Task family
   execution_role_arn    = aws_iam_role.ecs_task_role.arn  # Role for ECS task execution
   container_definitions = jsonencode([
     {
