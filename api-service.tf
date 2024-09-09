@@ -27,6 +27,9 @@ data "aws_ssm_parameter" "db_username" {
 data "aws_ssm_parameter" "db_password" {
   name = aws_ssm_parameter.db_password.name
 }
+data "aws_ssm_parameter" "db_name" {
+  name = aws_ssm_parameter.db_name.name
+}
 
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
@@ -77,6 +80,10 @@ resource "aws_ecs_task_definition" "task_definition" {
         {
           name = "DB_PASSWORD"
           value = data.aws_ssm_parameter.db_password.value
+        },
+        {
+          name = "DB_NAME"
+          value = data.aws_ssm_parameter.db_name.value
         }
       ]
       logConfiguration = {

@@ -31,3 +31,9 @@ resource "aws_ssm_parameter" "db_password" {
   type  = "SecureString"
   value = aws_db_instance.default.password
 }
+
+resource "aws_ssm_parameter" "db_name" {
+  name  = "/db_secrets/protoapp_db_name"
+  type  = "String"
+  value = "base_db"
+}
