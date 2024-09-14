@@ -124,6 +124,10 @@ resource "aws_ecs_task_definition" "task_definition" {
         {
           name = "WEBAPP_URI"
           value = data.aws_ssm_parameter.google_redirect_uri.value
+        },
+        {
+          name = "SERVER_PORT"
+          value = "80"
         }
       ]
       logConfiguration = {
