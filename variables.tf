@@ -57,3 +57,11 @@ variable "google_client_secret" {
   default = ""
 }
 
+
+variable "stripe_secret_key" {
+    default = ""
+}
+
+variable "stripe_webhook_secret" {
+    default = ""
+}

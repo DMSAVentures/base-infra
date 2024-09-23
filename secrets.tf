@@ -76,3 +76,27 @@ resource "aws_ssm_parameter" "web_app_uri" {
   type = "String"
   value = "https://protoapp.xyz"
 }
+
+resource "aws_ssm_parameter" "stripe_publishable_key" {
+  name = "/stripe_secrets/protoapp_stripe_publishable_key"
+  type = "String"
+  value = "pk_live_51PxCuHP3M2g0n0x3rpcflZx5JgmeMo7Le4eQFEj2coL6EwODaZ4L0YsfUGm32hXjzMruRZtmQXqUlvHcz2ZsVCwZ00O8C2Is5h"
+}
+
+resource "aws_ssm_parameter" "stripe_secret_key" {
+  name = "/stripe_secrets/protoapp_stripe_secret_key"
+  type = "SecureString"
+  value = var.stripe_secret_key
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+  }
+}
+
+resource "aws_ssm_parameter" "stripe_webhook_secret" {
+  name = "/stripe_secrets/protoapp_stripe_webhook_secret"
+  type = "SecureString"
+  value = var.stripe_webhook_secret
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+    }
+}

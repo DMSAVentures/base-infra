@@ -51,6 +51,14 @@ data "aws_ssm_parameter" "web_app_uri" {
   name = aws_ssm_parameter.web_app_uri.name
 }
 
+data "aws_ssm_parameter" "stripe_secret_key" {
+  name = aws_ssm_parameter.stripe_secret_key.name
+}
+
+data "aws_ssm_parameter" "stripe_webhook_secret" {
+  name = aws_ssm_parameter.stripe_webhook_secret.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -128,6 +136,14 @@ resource "aws_ecs_task_definition" "task_definition" {
         {
           name = "SERVER_PORT"
           value = "80"
+        },
+        {
+          name = "STRIPE_SECRET_KEY"
+          value = data.aws_ssm_parameter.stripe_secret_key.value
+        },
+        {
+          name = "STRIPE_WEBHOOK_SECRET"
+          value = data.aws_ssm_parameter.stripe_webhook_secret.value
         }
       ]
       logConfiguration = {
