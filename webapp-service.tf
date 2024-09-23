@@ -56,6 +56,10 @@ resource "aws_ecs_task_definition" "webapp_task_definition" {
         {
             name = "NEXT_PUBLIC_GOOGLE_REDIRECT_URI"
             value = "https://protoapp.xyz/api/auth/google/callback"
+        },
+        {
+          name = "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+          value = "pk_live_51PxCuHP3M2g0n0x3rpcflZx5JgmeMo7Le4eQFEj2coL6EwODaZ4L0YsfUGm32hXjzMruRZtmQXqUlvHcz2ZsVCwZ00O8C2Is5h"
         }
       ]
       logConfiguration = {
