@@ -49,7 +49,7 @@ resource "aws_alb_target_group" "webapp_ecs_target" {
   vpc_id      = aws_vpc.base_vpc.id
 
   health_check {
-    path                = "/"
+    path                = "/signin"
     port                = "traffic-port"
     protocol            = "HTTP"
     timeout             = 5
