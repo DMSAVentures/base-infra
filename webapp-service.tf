@@ -41,7 +41,7 @@ resource "aws_ecs_task_definition" "webapp_task_definition" {
       healthCheck = {
         command = [
           "CMD-SHELL",
-          "curl -f http://localhost:3000 || exit 1"  # Command to check if the container is healthy
+          "curl -f http://localhost:3000/signin || exit 1"  # Command to check if the container is healthy
         ]
         interval        = 30  # Time (in seconds) between health checks
         timeout         = 5   # Time (in seconds) to wait for a response before considering it a failure
