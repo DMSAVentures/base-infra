@@ -100,3 +100,21 @@ resource "aws_ssm_parameter" "stripe_webhook_secret" {
     ignore_changes = [value]  # Ignore changes to the value once it’s set
     }
 }
+
+resource "aws_ssm_parameter" "resend_api_key" {
+  name  = "/api_service/protoapp_resend_api_key"
+  type  = "String"
+  value = var.resend_api_key
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+  }
+}
+
+resource "aws_ssm_parameter" "default_email_sender_address" {
+  name  = "/api_service/protoapp_default_email_sender_address"
+  type  = "String"
+  value = var.default_email_sender_address
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+  }
+}

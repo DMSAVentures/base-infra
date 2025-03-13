@@ -65,3 +65,11 @@ variable "stripe_secret_key" {
 variable "stripe_webhook_secret" {
     default = ""
 }
+
+variable "resend_api_key" {
+    default = ""
+}
+
+variable "default_email_sender_address" {
+    default = ""
+}

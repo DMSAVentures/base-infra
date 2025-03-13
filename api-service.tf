@@ -59,6 +59,14 @@ data "aws_ssm_parameter" "stripe_webhook_secret" {
   name = aws_ssm_parameter.stripe_webhook_secret.name
 }
 
+data "aws_ssm_parameter" "resend_api_key" {
+  name = aws_ssm_parameter.resend_api_key.name
+}
+
+data "aws_ssm_parameter" "default_email_sender_address" {
+  name = aws_ssm_parameter.default_email_sender_address.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -143,6 +151,14 @@ resource "aws_ecs_task_definition" "task_definition" {
         },
         {
           name = "STRIPE_WEBHOOK_SECRET"
+          value = data.aws_ssm_parameter.stripe_webhook_secret.value
+        },
+        {
+          name = "RESEND_API_KEY"
+          value = data.aws_ssm_parameter.stripe_webhook_secret.value
+        },
+        {
+          name = "DEFAULT_EMAIL_SENDER_ADDRESS"
           value = data.aws_ssm_parameter.stripe_webhook_secret.value
         }
       ]
