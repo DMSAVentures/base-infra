@@ -118,3 +118,21 @@ resource "aws_ssm_parameter" "default_email_sender_address" {
     ignore_changes = [value]  # Ignore changes to the value once it’s set
   }
 }
+
+resource "aws_ssm_parameter" "gemini_api_key" {
+  name  = "/api_service/protoapp_gemini_api_key"
+  type  = "String"
+  value = var.gemini_api_key
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+  }
+}
+
+resource "aws_ssm_parameter" "openai_api_key" {
+  name  = "/api_service/protoapp_openai_api_key"
+  type  = "String"
+  value = var.openai_api_key
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it’s set
+  }
+}

@@ -67,6 +67,14 @@ data "aws_ssm_parameter" "default_email_sender_address" {
   name = aws_ssm_parameter.default_email_sender_address.name
 }
 
+data "aws_ssm_parameter" "gemini_api_key" {
+  name = aws_ssm_parameter.gemini_api_key.name
+}
+
+data "aws_ssm_parameter" "openai_api_key" {
+    name = aws_ssm_parameter.openai_api_key.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -155,11 +163,19 @@ resource "aws_ecs_task_definition" "task_definition" {
         },
         {
           name = "RESEND_API_KEY"
-          value = data.aws_ssm_parameter.stripe_webhook_secret.value
+          value = data.aws_ssm_parameter.resend_api_key.value
         },
         {
           name = "DEFAULT_EMAIL_SENDER_ADDRESS"
-          value = data.aws_ssm_parameter.stripe_webhook_secret.value
+          value = data.aws_ssm_parameter.default_email_sender_address.value
+        },
+        {
+          name = "GOOGLE_AI_API_KEY"
+          value = data.aws_ssm_parameter.gemini_api_key.value
+        },
+        {
+          name = "OPENAI_API_KEY"
+          value = data.aws_ssm_parameter.openai_api_key.value
         }
       ]
       logConfiguration = {

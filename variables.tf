@@ -73,3 +73,12 @@ variable "resend_api_key" {
 variable "default_email_sender_address" {
     default = ""
 }
+
+
+variable "gemini_api_key" {
+  default = ""
+}
+
+variable "openai_api_key" {
+  default = ""
+}
