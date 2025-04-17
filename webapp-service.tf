@@ -50,15 +50,15 @@ resource "aws_ecs_task_definition" "webapp_task_definition" {
       }
       environment = [  # Environment variables
         {
-          name = "NEXT_PUBLIC_GOOGLE_CLIENT_ID"
+          name = "VITE_GOOGLE_CLIENT_ID"
           value = "264792512466-81b98c4ctp11qj177mgmj817o23a12bn.apps.googleusercontent.com"
         },
         {
-            name = "NEXT_PUBLIC_GOOGLE_REDIRECT_URI"
+            name = "VITE_GOOGLE_REDIRECT_URI"
             value = "https://protoapp.xyz/api/auth/google/callback"
         },
         {
-          name = "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+          name = "VITE_STRIPE_PUBLISHABLE_KEY"
           value = "pk_live_51PxCuHP3M2g0n0x3rpcflZx5JgmeMo7Le4eQFEj2coL6EwODaZ4L0YsfUGm32hXjzMruRZtmQXqUlvHcz2ZsVCwZ00O8C2Is5h"
         }
       ]
