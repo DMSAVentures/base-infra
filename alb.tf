@@ -19,9 +19,14 @@ resource "aws_lb_listener" "https_listener" {
   ssl_policy        = "ELBSecurityPolicy-2016-08"
   certificate_arn   = aws_acm_certificate.ssl_cert.arn # Replace with your SSL certificate ARN
 
+  # Default action returns 404 - API paths are handled by listener rules
   default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.webapp_ecs_target.arn
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
   }
 }
 
@@ -42,24 +47,10 @@ resource "aws_alb_target_group" "ecs_target" {
     }
 }
 
-resource "aws_alb_target_group" "webapp_ecs_target" {
-  name        = "webapp-ecs-target-group"
-  port        = 3000
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.base_vpc.id
+# Webapp target group removed - webapp now served via S3/CloudFront
+# See s3-cloudfront.tf for webapp hosting configuration
 
-  health_check {
-    path                = "/signin"
-    port                = "traffic-port"
-    protocol            = "HTTP"
-    timeout             = 5
-    interval            = 30
-    healthy_threshold   = 5
-    unhealthy_threshold = 2
-  }
-}
-
-# ALB Listener Rule
+# ALB Listener Rule for API
 resource "aws_lb_listener_rule" "alb_listener_rule_api" {
   listener_arn = aws_lb_listener.https_listener.id
   priority     = 1
@@ -72,22 +63,6 @@ resource "aws_lb_listener_rule" "alb_listener_rule_api" {
   condition {
     path_pattern {
       values = ["/api/*"]
-    }
-  }
-}
-
-resource "aws_lb_listener_rule" "alb_listener_rule_webapp" {
-  listener_arn = aws_lb_listener.https_listener.id
-  priority     = 2
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.webapp_ecs_target.arn
-  }
-
-  condition {
-    path_pattern {
-      values = ["/*"]
     }
   }
 }

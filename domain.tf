@@ -26,22 +26,22 @@ resource "cloudflare_record" "acm_validation" {
   ttl     = 1 # Automatic TTL
 }
 
-resource "cloudflare_record" "root_to_alb" {
+resource "cloudflare_record" "root_to_cloudfront" {
   zone_id = var.cloudflare_zone_id
   name    = "@"
   type    = "CNAME"
-  value   = lower(aws_lb.k8s_alb.dns_name)
+  value   = aws_cloudfront_distribution.webapp_distribution.domain_name
   ttl     = 1  # 1 means automatic
-  proxied = true # Or false, depending on whether you want Cloudflare's features like CDN/WAF
+  proxied = false # CloudFront handles CDN/caching, so disable Cloudflare proxy
 }
 
-resource "cloudflare_record" "www_to_alb" {
+resource "cloudflare_record" "www_to_cloudfront" {
   zone_id = var.cloudflare_zone_id
   name    = "www"
   type    = "CNAME"
-  value   = lower(aws_lb.k8s_alb.dns_name)
+  value   = aws_cloudfront_distribution.webapp_distribution.domain_name
   ttl     = 1  # 1 means automatic
-  proxied = true # Or false, depending on whether you want Cloudflare's features like CDN/WAF
+  proxied = false # CloudFront handles CDN/caching, so disable Cloudflare proxy
 }
 
 resource "cloudflare_zone_settings_override" "ssl_tls_settings" {
