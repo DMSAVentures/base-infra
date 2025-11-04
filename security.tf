@@ -37,6 +37,15 @@ resource "aws_security_group" "alb_sg" {
   vpc_id      = aws_vpc.base_vpc.id
 }
 
+resource "aws_security_group_rule" "alb_http_ingress" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.alb_sg.id
+}
+
 resource "aws_security_group_rule" "alb_https_ingress" {
   type              = "ingress"
   from_port         = 443
