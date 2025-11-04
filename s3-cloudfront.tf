@@ -158,7 +158,7 @@ resource "aws_cloudfront_distribution" "webapp_distribution" {
 # CloudWatch Log Group for CloudFront (optional)
 resource "aws_cloudwatch_log_group" "cloudfront_logs" {
   name              = "/aws/cloudfront/webapp"
-  retention_in_days = 14
+  retention_in_days = 7
 
   tags = {
     Name        = "CloudFront Webapp Logs"

@@ -194,5 +194,5 @@ resource "aws_ecs_task_definition" "task_definition" {
 # Defines a CloudWatch log group for ECS task logging.
 resource "aws_cloudwatch_log_group" "ecs_log_group" {
   name              = "${var.container_name_api}-logs"  # Log group name
-  retention_in_days = 14  # Retention period for logs
+  retention_in_days = 7  # Retention period for logs
 }

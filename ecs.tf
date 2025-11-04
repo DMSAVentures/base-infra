@@ -67,30 +67,11 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
 }
 
 # Launch Configuration for AutoScaling Group
-# Defines the EC2 launch configuration for ECS instances.
-resource "aws_launch_configuration" "app_launch_config" {
-  name               = "app-launch-config"  # Name of the launch config
-  image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
-  instance_type      = "t2.micro"  # Instance type (e.g., t2.micro)
-  security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
-  iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
-  # User data to set ECS cluster
-  lifecycle {
-    create_before_destroy = true
-  }
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo dnf install -y ec2-instance-connect
-    echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
-  EOF
-}
-
-# Launch Configuration for AutoScaling Group
-# Defines the EC2 launch configuration for ECS instances.
+# Defines the EC2 launch configuration for ECS instances with SSM support.
 resource "aws_launch_configuration" "app_launch_config_with_ssm" {
-  name               = "app-launch-config-with-ssm"  # Name of the launch config
+  name_prefix        = "app-launch-config-with-ssm-"  # Use name_prefix instead of name for create_before_destroy
   image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
-  instance_type      = "t2.micro"  # Instance type (e.g., t2.micro)
+  instance_type      = "t3.micro"  # Instance type (e.g., t3.micro)
   security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
   # User data to set ECS cluster
@@ -103,6 +84,10 @@ resource "aws_launch_configuration" "app_launch_config_with_ssm" {
     sudo dnf install -y ec2-instance-connect
     echo ECS_CLUSTER=${aws_ecs_cluster.ecs_cluster.id} >> /etc/ecs/ecs.config
   EOF
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # AutoScaling Group
