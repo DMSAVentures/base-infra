@@ -52,6 +52,38 @@ resource "aws_cloudfront_origin_access_control" "webapp_oac" {
   signing_protocol                  = "sigv4"
 }
 
+# CloudFront Function for SPA routing
+# Rewrites requests to /index.html for client-side routes (excluding /api/* and static assets)
+resource "aws_cloudfront_function" "spa_routing" {
+  name    = "spa-routing-function"
+  runtime = "cloudfront-js-2.0"
+  comment = "Rewrite requests to index.html for SPA routing"
+  publish = true
+  code    = <<-EOT
+function handler(event) {
+    var request = event.request;
+    var uri = request.uri;
+
+    // Don't rewrite API requests
+    if (uri.startsWith('/api/')) {
+        return request;
+    }
+
+    // Check if the URI has a file extension (e.g., .js, .css, .png, .svg)
+    // If it does, it's a static asset, so don't rewrite
+    if (uri.includes('.')) {
+        return request;
+    }
+
+    // For all other requests (client-side routes), rewrite to index.html
+    // The URL in the browser stays unchanged, allowing TanStack Router to handle routing
+    request.uri = '/index.html';
+
+    return request;
+}
+EOT
+}
+
 # CloudFront Distribution for Webapp
 resource "aws_cloudfront_distribution" "webapp_distribution" {
   enabled             = true
@@ -98,6 +130,12 @@ resource "aws_cloudfront_distribution" "webapp_distribution" {
     default_ttl            = 3600
     max_ttl                = 86400
     compress               = true
+
+    # Attach CloudFront Function for SPA routing
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.spa_routing.arn
+    }
   }
 
   # Cache behavior for API requests
