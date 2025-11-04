@@ -12,6 +12,24 @@ resource "aws_lb" "k8s_alb" {
   }
 }
 
+# HTTP Listener for CloudFront -> ALB communication
+resource "aws_lb_listener" "http_listener" {
+  load_balancer_arn = aws_lb.k8s_alb.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  # Default action returns 404 - API paths are handled by listener rules
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
+  }
+}
+
+# HTTPS Listener (kept for backward compatibility)
 resource "aws_lb_listener" "https_listener" {
   load_balancer_arn = aws_lb.k8s_alb.arn
   port              = 443
@@ -50,8 +68,25 @@ resource "aws_alb_target_group" "ecs_target" {
 # Webapp target group removed - webapp now served via S3/CloudFront
 # See s3-cloudfront.tf for webapp hosting configuration
 
-# ALB Listener Rule for API
-resource "aws_lb_listener_rule" "alb_listener_rule_api" {
+# ALB Listener Rule for API (HTTP - for CloudFront)
+resource "aws_lb_listener_rule" "alb_listener_rule_api_http" {
+  listener_arn = aws_lb_listener.http_listener.id
+  priority     = 1
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_alb_target_group.ecs_target.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
+    }
+  }
+}
+
+# ALB Listener Rule for API (HTTPS - for backward compatibility)
+resource "aws_lb_listener_rule" "alb_listener_rule_api_https" {
   listener_arn = aws_lb_listener.https_listener.id
   priority     = 1
 

@@ -67,6 +67,8 @@ resource "aws_cloudfront_distribution" "webapp_distribution" {
   }
 
   # API Origin - forward /api/* requests to ALB
+  # Using HTTP since ALB only needs to communicate with CloudFront (not end users)
+  # End-to-end encryption: User -> CloudFront (HTTPS) -> ALB (HTTP) -> ECS (HTTP)
   origin {
     domain_name = aws_lb.k8s_alb.dns_name
     origin_id   = "ALB-API"
@@ -74,7 +76,7 @@ resource "aws_cloudfront_distribution" "webapp_distribution" {
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "https-only"
+      origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
