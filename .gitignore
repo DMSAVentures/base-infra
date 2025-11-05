@@ -34,3 +34,9 @@ override.tf.json
 terraform.rc
 
 .idea
+
+# App-specific secrets
+apps/*/secrets.tfvars
+
+# Old backup files
+*.old
