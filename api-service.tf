@@ -80,17 +80,18 @@ data "aws_ssm_parameter" "openai_api_key" {
 resource "aws_ecs_task_definition" "task_definition" {
   family                = "base-server"  # Task family
   execution_role_arn    = aws_iam_role.ecs_task_role.arn  # Role for ECS task execution
+  network_mode          = "bridge"  # Use bridge networking
   container_definitions = jsonencode([
     {
       name         = var.container_name_api  # Container name
       image        = "${data.aws_ecr_repository.api_service.repository_url}:latest"  # Docker image to run in ECS
-      cpu          = 256  # CPU units
-      memory       = 256  # Memory in MB
+      cpu          = 512  # CPU units (~25% of t3.small)
+      memory       = 512  # Memory in MB (~25% of t3.small)
       essential    = true  # Is this container essential to the task?
       portMappings = [
         {
           containerPort = 80  # Inside the container
-          hostPort      = 0  # On the host EC2 instance
+          hostPort      = 0   # Dynamic port on host
         }
       ]
       # Health check configuration
@@ -178,7 +179,7 @@ resource "aws_ecs_task_definition" "task_definition" {
           value = data.aws_ssm_parameter.openai_api_key.value
         },
         {
-          name = "KAFKA_BROKER"
+          name = "KAFKA_BROKERS"
           value = "kafka.base-services.local:9092"
         }
       ]

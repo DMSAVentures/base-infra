@@ -54,6 +54,17 @@ resource "aws_security_group" "efs_kafka" {
   }
 }
 
+# Security group rule to allow Kafka service to access EFS
+resource "aws_security_group_rule" "kafka_to_efs" {
+  type                     = "ingress"
+  from_port                = 2049
+  to_port                  = 2049
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.efs_kafka.id
+  source_security_group_id = aws_security_group.kafka_service.id
+  description              = "NFS from Kafka service"
+}
+
 # CloudWatch Log Group for Kafka Container
 resource "aws_cloudwatch_log_group" "kafka_log_group" {
   name              = "kafka-logs"
@@ -158,8 +169,8 @@ resource "aws_ecs_task_definition" "kafka_task" {
     {
       name      = "kafka"
       image     = "confluentinc/cp-kafka:latest"
-      cpu       = 512
-      memory    = 1024
+      cpu       = 1024  # CPU units (~50% of t3.small)
+      memory    = 1024  # Memory in MB (~50% of t3.small)
       essential = true
 
       portMappings = [
@@ -183,6 +194,14 @@ resource "aws_ecs_task_definition" "kafka_task" {
 
       environment = [
         {
+          name  = "KAFKA_HEAP_OPTS"
+          value = "-Xmx768m -Xms768m"
+        },
+        {
+          name  = "KAFKA_LOG_DIRS"
+          value = "/var/lib/kafka/data"
+        },
+        {
           name  = "KAFKA_NODE_ID"
           value = "1"
         },
@@ -196,7 +215,7 @@ resource "aws_ecs_task_definition" "kafka_task" {
         },
         {
           name  = "KAFKA_LISTENERS"
-          value = "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+          value = "PLAINTEXT://0.0.0.0:9092,CONTROLLER://localhost:9093"
         },
         {
           name  = "KAFKA_ADVERTISED_LISTENERS"
@@ -229,6 +248,10 @@ resource "aws_ecs_task_definition" "kafka_task" {
         {
           name  = "KAFKA_AUTO_CREATE_TOPICS_ENABLE"
           value = "true"
+        },
+        {
+          name  = "KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS"
+          value = "0"
         },
         {
           name  = "CLUSTER_ID"

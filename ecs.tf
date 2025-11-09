@@ -71,7 +71,7 @@ resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
 resource "aws_launch_configuration" "app_launch_config_with_ssm" {
   name_prefix        = "app-launch-config-with-ssm-"  # Use name_prefix instead of name for create_before_destroy
   image_id           = "ami-0af9e559c6749eb48"  # Amazon Machine Image (AMI)
-  instance_type      = "t3.micro"  # Instance type (e.g., t3.micro)
+  instance_type      = "t3.small"  # Instance type (2GB RAM, ~$15/month)
   security_groups    = [aws_security_group.web_dmz.id]  # Security group for the instances
   iam_instance_profile = aws_iam_instance_profile.ecs_instance_profile.name  # Instance profile for EC2
   # User data to set ECS cluster
