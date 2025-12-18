@@ -52,6 +52,10 @@ resource "aws_security_group" "efs_kafka" {
   tags = {
     Name = "EFS Kafka Security Group"
   }
+
+  lifecycle {
+    ignore_changes = [ingress]
+  }
 }
 
 # Security group rule to allow Kafka service to access EFS
@@ -147,9 +151,10 @@ resource "aws_security_group" "kafka_service" {
 
 # ECS Task Definition for Kafka
 resource "aws_ecs_task_definition" "kafka_task" {
-  family             = "kafka"
-  execution_role_arn = aws_iam_role.ecs_task_role.arn
-  network_mode       = "awsvpc"
+  family                   = "kafka"
+  execution_role_arn       = aws_iam_role.ecs_task_role.arn
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["EC2"]
 
   # EFS Volume for Kafka Data Persistence
   volume {
@@ -169,8 +174,8 @@ resource "aws_ecs_task_definition" "kafka_task" {
     {
       name      = "kafka"
       image     = "confluentinc/cp-kafka:latest"
-      cpu       = 1024  # CPU units (~50% of t3.small)
-      memory    = 1024  # Memory in MB (~50% of t3.small)
+      cpu       = 512   # CPU units (~25% of t3.small)
+      memory    = 768   # Memory in MB (~37.5% of t3.small)
       essential = true
 
       portMappings = [
@@ -195,7 +200,7 @@ resource "aws_ecs_task_definition" "kafka_task" {
       environment = [
         {
           name  = "KAFKA_HEAP_OPTS"
-          value = "-Xmx768m -Xms768m"
+          value = "-Xmx512m -Xms512m"
         },
         {
           name  = "KAFKA_LOG_DIRS"

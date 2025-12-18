@@ -85,8 +85,8 @@ resource "aws_ecs_task_definition" "task_definition" {
     {
       name         = var.container_name_api  # Container name
       image        = "${data.aws_ecr_repository.api_service.repository_url}:latest"  # Docker image to run in ECS
-      cpu          = 512  # CPU units (~25% of t3.small)
-      memory       = 512  # Memory in MB (~25% of t3.small)
+      cpu          = 256  # CPU units (~12.5% of t3.small)
+      memory       = 256  # Memory in MB (~12.5% of t3.small)
       essential    = true  # Is this container essential to the task?
       portMappings = [
         {
