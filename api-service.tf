@@ -75,6 +75,10 @@ data "aws_ssm_parameter" "openai_api_key" {
     name = aws_ssm_parameter.openai_api_key.name
 }
 
+data "aws_ssm_parameter" "turnstile_secret_key" {
+    name = aws_ssm_parameter.turnstile_secret_key.name
+}
+
 # ECS Task Definition
 # Defines the ECS task, including its execution role, container details, and logging configuration.
 resource "aws_ecs_task_definition" "task_definition" {
@@ -181,6 +185,10 @@ resource "aws_ecs_task_definition" "task_definition" {
         {
           name = "KAFKA_BROKERS"
           value = "kafka.base-services.local:9092"
+        },
+        {
+          name = "TURNSTILE_SECRET_KEY"
+          value = data.aws_ssm_parameter.turnstile_secret_key.value
         }
       ]
       logConfiguration = {

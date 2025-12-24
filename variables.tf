@@ -82,3 +82,7 @@ variable "gemini_api_key" {
 variable "openai_api_key" {
   default = ""
 }
+
+variable "turnstile_secret_key" {
+  default = ""
+}

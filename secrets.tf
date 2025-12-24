@@ -133,6 +133,15 @@ resource "aws_ssm_parameter" "openai_api_key" {
   type  = "String"
   value = var.openai_api_key
   lifecycle {
-    ignore_changes = [value]  # Ignore changes to the value once it’s set
+    ignore_changes = [value]  # Ignore changes to the value once it's set
+  }
+}
+
+resource "aws_ssm_parameter" "turnstile_secret_key" {
+  name  = "/api_service/protoapp_turnstile_secret_key"
+  type  = "SecureString"
+  value = var.turnstile_secret_key
+  lifecycle {
+    ignore_changes = [value]  # Ignore changes to the value once it's set
   }
 }
